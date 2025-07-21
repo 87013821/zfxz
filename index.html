@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>支付方式</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            alipay: '#1677FF',
+            wechat: '#07C160',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .payment-icon-shadow {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+      }
+      .payment-icon-hover {
+        transition: all 0.3s ease;
+      }
+      .payment-icon-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .modal-fade {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      .modal-scale {
+        animation: scaleIn 0.3s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen flex flex-col">
+  <!-- 页面头部 -->
+  <header class="bg-white shadow-sm py-6">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800 text-center">
+        选择支付方式
+      </h1>
+      <p class="text-gray-500 text-center mt-2">请选择您偏好的支付方式完成交易</p>
+    </div>
+  </header>
+
+<!-- 主要内容区 -->
+  <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-2xl mx-auto">
+      <!-- 支付方式卡片容器 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- 支付宝图标卡片 -->
+        <div class="bg-white rounded-xl p-8 flex flex-col items-center justify-center payment-icon-shadow payment-icon-hover border border-gray-100">
+          <div class="w-32 h-32 flex items-center justify-center rounded-full bg-alipay/10 mb-6">
+            <i class="fa fa-credit-card text-6xl text-alipay"></i>
+          </div>
+          <h2 class="text-xl font-semibold text-gray-800 mb-2">支付宝支付</h2>
+          <p class="text-gray-500 text-center text-sm">安全快捷的移动支付方式</p>
+          <button id="alipayBtn" class="mt-6 px-6 py-2 bg-alipay text-white rounded-lg hover:bg-alipay/90 transition-colors">
+            选择支付宝
+          </button>
+        </div>
+        
+        <!-- 微信支付图标卡片 -->
+        <div class="bg-white rounded-xl p-8 flex flex-col items-center justify-center payment-icon-shadow payment-icon-hover border border-gray-100">
+          <div class="w-32 h-32 flex items-center justify-center rounded-full bg-wechat/10 mb-6">
+            <i class="fa fa-wechat text-6xl text-wechat"></i>
+          </div>
+          <h2 class="text-xl font-semibold text-gray-800 mb-2">微信支付</h2>
+          <p class="text-gray-500 text-center text-sm">通过微信完成便捷支付</p>
+          <button id="wechatBtn" class="mt-6 px-6 py-2 bg-wechat text-white rounded-lg hover:bg-wechat/90 transition-colors">
+            选择微信支付
+          </button>
+        </div>
+      </div>
+      
+      <!-- 支付说明 -->
+      <div class="mt-12 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-medium text-gray-800 mb-3 flex items-center">
+          <i class="fa fa-info-circle text-blue-500 mr-2"></i>支付说明
+        </h3>
+        <ul class="text-gray-600 space-y-2 text-sm">
+          <li class="flex items-start">
+            <i class="fa fa-check-circle text-green-500 mt-1 mr-2"></i>
+            <span>所有支付信息均经过加密处理，保障您的资金安全</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fa fa-check-circle text-green-500 mt-1 mr-2"></i>
+            <span>支付完成后，系统将自动确认并处理您的订单</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fa fa-check-circle text-green-500 mt-1 mr-2"></i>
+            <span>如有支付问题，请联系客服获取帮助</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+<!-- 支付宝支付弹窗 -->
+  <div id="alipayModal" class="fixed inset-0 bg-black/70 z-50 hidden modal-fade items-center justify-center">
+    <div class="bg-white rounded-xl max-w-md w-full mx-4 modal-scale overflow-hidden">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800">支付宝支付</h3>
+        <button class="close-modal text-gray-500 hover:text-gray-700 transition-colors" data-modal="alipayModal">
+          <i class="fa fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <!-- 弹窗内容（图片区域） -->
+      <div class="p-6">
+        <p class="text-gray-600 text-center mb-4">请使用支付宝扫描下方二维码支付</p>
+        <div class="flex justify-center">
+          <!-- 替换为你的支付宝收款二维码图片 -->
+          <img src="https://raw.githubusercontent.com/87013821/imagez/main/zhifubao.jpg" alt="支付宝收款二维码" class="max-w-full h-auto rounded-lg shadow-md">
+        </div>
+        <p class="text-gray-500 text-xs text-center mt-4">
+          提示：保存图片到手机相册，打开支付宝扫描相册中的二维码
+        </p>
+      </div>
+      
+      <!-- 弹窗底部 -->
+      <div class="px-6 py-4 bg-gray-50 flex justify-center">
+        <button class="confirm-pay px-6 py-2 bg-alipay text-white rounded-lg hover:bg-alipay/90 transition-colors" data-modal="alipayModal">
+          已完成支付
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 微信支付弹窗 -->
+  <div id="wechatModal" class="fixed inset-0 bg-black/70 z-50 hidden modal-fade items-center justify-center">
+    <div class="bg-white rounded-xl max-w-md w-full mx-4 modal-scale overflow-hidden">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800">微信支付</h3>
+        <button class="close-modal text-gray-500 hover:text-gray-700 transition-colors" data-modal="wechatModal">
+          <i class="fa fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <!-- 弹窗内容（图片区域） -->
+      <div class="p-6">
+        <p class="text-gray-600 text-center mb-4">请使用微信扫描下方二维码支付</p>
+        <div class="flex justify-center">
+          <!-- 替换为你的微信收款二维码图片 -->
+          <img src="https://raw.githubusercontent.com/87013821/image/main/weixin.jpg?imageMogr2/quality/100/interlace/1/thumbnail/2000x%3E" alt="微信收款二维码" class="max-w-full h-auto rounded-lg shadow-md">
+        </div>
+        <p class="text-gray-500 text-xs text-center mt-4">
+          提示：保存图片到手机相册，打开微信扫描相册中的二维码
+        </p>
+      </div>
+      
+      <!-- 弹窗底部 -->
+      <div class="px-6 py-4 bg-gray-50 flex justify-center">
+        <button class="confirm-pay px-6 py-2 bg-wechat text-white rounded-lg hover:bg-wechat/90 transition-colors" data-modal="wechatModal">
+          已完成支付
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center text-gray-400 text-sm">
+        <p>© 2025 支付服务中心. 保留所有权利</p>
+        <p class="mt-2">支付安全有保障，放心使用</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 通用弹窗控制函数
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden'; // 禁止背景滚动
+    }
+    
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = ''; // 恢复背景滚动
+    }
+
+ // 支付宝支付按钮点击事件
+    document.getElementById('alipayBtn').addEventListener('click', () => {
+      showModal('alipayModal');
+    });
+    
+    // 微信支付按钮点击事件
+    document.getElementById('wechatBtn').addEventListener('click', () => {
+      showModal('wechatModal');
+    });
+    
+    // 关闭按钮事件委托
+    document.querySelectorAll('.close-modal').forEach(button => {
+      button.addEventListener('click', () => {
+        const modalId = button.dataset.modal;
+        hideModal(modalId);
+      });
+    });
+    
+    // 已完成支付按钮事件委托
+    document.querySelectorAll('.confirm-pay').forEach(button => {
+      button.addEventListener('click', () => {
+        const modalId = button.dataset.modal;
+        hideModal(modalId);
+        alert('已收到您的支付信息，正在确认中...');
+      });
+    });
+    
+    // 点击弹窗外部关闭
+    document.querySelectorAll('#alipayModal, #wechatModal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          hideModal(modal.id);
+        }
+      });
+    });
+    
+    // 页面加载动画
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentCards = document.querySelectorAll('.payment-icon-hover');
+      paymentCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          card.style.transition = 'all 0.5s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 100 + index * 150);
+      });
+    });
+  </script>
+</body>
+</html>
